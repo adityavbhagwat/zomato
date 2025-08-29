@@ -7,6 +7,8 @@ import com.zomato.authservice.dto.LoginResponseDTO;
 import com.zomato.authservice.model.User;
 import com.zomato.authservice.repository.UserRepository;
 import com.zomato.authservice.exception.AuthException;
+import com.zomato.authservice.dto.UserProfileBootstrapDTO;
+import com.zomato.authservice.service.bootstrap.UserProfileBootstrapService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,8 @@ import org.springframework.stereotype.Service;
 public class AuthUserServiceImpl implements AuthUserService {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserProfileBootstrapService userProfileBootstrapService;
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
@@ -32,6 +36,10 @@ public class AuthUserServiceImpl implements AuthUserService {
             user.setEmail(registrationDTO.getEmail());
             user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
             User savedUser = userRepository.save(user);
+            // Bootstrap user profile in user microservice
+            UserProfileBootstrapDTO profileDTO = new UserProfileBootstrapDTO(savedUser.getId(), savedUser.getName(),
+                    savedUser.getEmail());
+            userProfileBootstrapService.bootstrapUserProfile(profileDTO);
             return new UserResponseDTO(savedUser.getId(), savedUser.getName(), savedUser.getEmail());
         } catch (Exception e) {
             throw new AuthException("Registration failed: " + e.getMessage(), 500);
