@@ -12,7 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class AuthUserServiceImpl implements AuthUserService {
     @Autowired
     private UserRepository userRepository;
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
