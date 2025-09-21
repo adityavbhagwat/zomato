@@ -11,18 +11,19 @@ import org.springframework.web.client.RestTemplate;
 public class HttpUserProfileBootstrapService implements UserProfileBootstrapService {
 
     @Value("${userservice.url}")
-    private String userServiceUrl; // e.g., http://localhost:8081/api/user/profile
+    private String userServiceUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Override
     public void bootstrapUserProfile(UserProfileBootstrapDTO dto) {
-        String url = userServiceUrl + "/create";
+        String url = userServiceUrl + "/bootstrap";
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(url, dto, String.class);
             // Optionally handle response
         } catch (Exception e) {
-            // Log or handle error
+            // print stack trace or log error
+            e.printStackTrace();
         }
     }
 }

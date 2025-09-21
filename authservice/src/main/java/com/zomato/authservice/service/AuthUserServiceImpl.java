@@ -9,9 +9,12 @@ import com.zomato.authservice.repository.UserRepository;
 import com.zomato.authservice.exception.AuthException;
 import com.zomato.authservice.dto.UserProfileBootstrapDTO;
 import com.zomato.authservice.service.bootstrap.UserProfileBootstrapService;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+// imort logger 
+import org.slf4j.LoggerFactory;
 
 @Service
 public class AuthUserServiceImpl implements AuthUserService {
@@ -20,6 +23,10 @@ public class AuthUserServiceImpl implements AuthUserService {
     @Autowired
     private UserProfileBootstrapService userProfileBootstrapService;
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    @Autowired
+    private JwtUtil jwtUtil;
+    private static final Logger logger = LoggerFactory.getLogger(AuthUserServiceImpl.class);
 
     @Override
     public UserResponseDTO registerUser(UserRegistrationDTO registrationDTO) {
@@ -37,8 +44,11 @@ public class AuthUserServiceImpl implements AuthUserService {
             user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
             User savedUser = userRepository.save(user);
             // Bootstrap user profile in user microservice
+
             UserProfileBootstrapDTO profileDTO = new UserProfileBootstrapDTO(savedUser.getId(), savedUser.getName(),
                     savedUser.getEmail());
+            logger.debug("AuthService: Sending ProfileBootstrapDTO: userId={}, fullName={}, email={}",
+                    profileDTO.getId(), profileDTO.getName(), profileDTO.getEmail());
             userProfileBootstrapService.bootstrapUserProfile(profileDTO);
             return new UserResponseDTO(savedUser.getId(), savedUser.getName(), savedUser.getEmail());
         } catch (Exception e) {
@@ -59,7 +69,7 @@ public class AuthUserServiceImpl implements AuthUserService {
             throw new AuthException("Invalid password", 401);
         }
         try {
-            String token = JwtUtil.generateToken(user.getEmail());
+            String token = jwtUtil.generateToken(user.getEmail());
             return new LoginResponseDTO(token, "Login successful");
         } catch (Exception e) {
             throw new AuthException("Login failed: " + e.getMessage(), 500);
