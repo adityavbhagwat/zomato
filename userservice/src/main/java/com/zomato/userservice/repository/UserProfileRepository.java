@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
+    // JpaRepository's findById(Long id) will now be used directly.
+    UserProfile findByEmail(String email);
 }

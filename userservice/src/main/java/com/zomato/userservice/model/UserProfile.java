@@ -1,29 +1,40 @@
 package com.zomato.userservice.model;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "users")
 public class UserProfile {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
-    private Long userId; // This links to the user ID from the authservice
+
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "email", nullable = false)
     private String email;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "address")
+    private String address;
 
     public UserProfile() {
         this.createdAt = LocalDateTime.now();
     }
 
-    public UserProfile(Long userId, String fullName, String email) {
-        this.userId = userId;
-        this.name = fullName;
+    // Constructor to be used by createProfile, now takes 'id' (which is
+    // authservice's userId)
+    public UserProfile(Long id, String name, String email) {
+        this.id = id; // Set the ID directly
+        this.name = name;
         this.email = email;
         this.createdAt = LocalDateTime.now();
     }
@@ -35,22 +46,15 @@ public class UserProfile {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+    } // Setter for ID
+      // Removed getUserId() and setUserId() as 'id' now serves this purpose
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String fullName) {
+        this.name = fullName;
     }
 
     public String getEmail() {
@@ -67,5 +71,13 @@ public class UserProfile {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }
